@@ -176,6 +176,25 @@ export function fetchAddon({ api, slug }: FetchAddonParams) {
   });
 }
 
+type FetchAddonVersionsParams = {|
+  api: ApiStateType,
+  filter?: 'all_without_unlisted' | 'all_with_unlisted' |
+    'all_with_deleted' | 'is_beta',
+  slug: string,
+|};
+
+export function fetchAddonVersions(
+  { api, slug, filter }: FetchAddonVersionsParams
+) {
+  return callApi({
+    auth: true,
+    endpoint: `addons/addon/${slug}/versions`,
+    params: { filter, page: 1, page_size: 1 },
+    schema: addon,
+    state: api,
+  });
+}
+
 type LoginParams = {|
   api: ApiStateType,
   code: string,

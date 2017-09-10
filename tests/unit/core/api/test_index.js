@@ -14,7 +14,10 @@ import {
   unexpectedSuccess,
   userAuthToken,
 } from 'tests/unit/helpers';
-import { createFakeAutocompleteResult } from 'tests/unit/amo/helpers';
+import {
+  createFakeAutocompleteResult,
+  fakeAddon,
+} from 'tests/unit/amo/helpers';
 
 
 describe(__filename, () => {
@@ -474,6 +477,41 @@ describe(__filename, () => {
           query: 'foo',
           addonType: ADDON_TYPE_THEME,
         },
+      })
+        .then(() => mockWindow.verify());
+    });
+  });
+
+  describe('fetchAddonVersions API', () => {
+    const mockResponse = () => createApiResponse({
+      jsonData: {
+        results: [
+          ...fakeAddon.current_version,
+        ],
+      },
+    });
+
+    it('fetches versions for an add-on', () => {
+      mockWindow.expects('fetch')
+        .withArgs(`${apiHost}/api/v3/addons/addon/my-addon/versions/?page=1&page_size=1&lang=en-US`)
+        .once()
+        .returns(mockResponse());
+      return api.fetchAddonVersions({
+        api: { clientApp: CLIENT_APP_ANDROID, lang: 'en-US' },
+        slug: 'my-addon',
+      })
+        .then(() => mockWindow.verify());
+    });
+
+    it('uses filter if supplied', () => {
+      mockWindow.expects('fetch')
+        .withArgs(`${apiHost}/api/v3/addons/addon/my-addon/versions/?filter=only_beta&page=1&page_size=1&lang=en-US`)
+        .once()
+        .returns(mockResponse());
+      return api.fetchAddonVersions({
+        api: { clientApp: CLIENT_APP_ANDROID, lang: 'en-US' },
+        filter: 'only_beta',
+        slug: 'my-addon',
       })
         .then(() => mockWindow.verify());
     });
